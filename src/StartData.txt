@@ -1,0 +1,3 @@
+StartData
+d	q	Vd	w	W0	Ld	hi	phi1	ns	lambda	Delta
+0.1	4.35	1715	5.8	7.03e-3	3.944	1.666	1.03	1	0.32	825

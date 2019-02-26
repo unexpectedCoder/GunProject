@@ -1,0 +1,6 @@
+Geometry of barrel:
+d, mm: 100.0
+d_main, mm: 130.0	l_main, mm: 605.0
+d_trans, mm: 124.0	l_trans, mm: 45.0
+d_tail, mm: 103.0	l_tail, mm: 315.0
+d_thrust, mm: 101.0	l_thrust, mm: 26.0

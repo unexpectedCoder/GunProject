@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+
+<!-- GOST 5192-67 -->
+<STEELS>
+	<steel name="O-700">
+		<data sigma="700" hardenability="0.16"/>
+	</steel>
+	<steel name="O-750">
+		<data sigma="750" hardenability="0.15"/>
+	</steel>
+	<steel name="O-800">
+		<data sigma="800" hardenability="0.14"/>
+	</steel>
+	<steel name="O-850">
+		<data sigma="850" hardenability="0.12"/>
+	</steel>
+	<steel name="O-1000">
+		<data sigma="1000" hardenability="0.08"/>
+	</steel>
+	<steel name="O-1050">
+		<data sigma="1050" hardenability="0.065"/>
+	</steel>
+	<steel name="O-1100">
+		<data sigma="1100" hardenability="0.05"/>
+	</steel>
+	<steel name="O-1150">
+		<data sigma="1150" hardenability="0.03"/>
+	</steel>
+	<steel name="O-1200">
+		<data sigma="1200" hardenability="0.015"/>
+	</steel>
+</STEELS>
