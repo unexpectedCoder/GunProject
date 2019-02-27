@@ -1,5 +1,6 @@
 import my_parser as mpar
 import plot_builder as pltb
+import materials
 
 import os
 from math import *
@@ -35,7 +36,15 @@ class Monoblock:
     L_cham_max = 0
     # For envelope curve
     p_env = []
-    L_env = []
+    L = []
+    # For desired resistance
+    p_des = []
+    L_res = []
+    # Barrel material
+    steel = materials.Steel([0, 0, 0])
+    # Geometry
+    r1 = []
+    r2 = []
 
     # Public functions
     def __init__(self, path_start_data):
@@ -100,6 +109,28 @@ class Monoblock:
         self.__make_length_list()
         self.__calc_max_chamber_p_L()
         self.__calc_envelope_curve()
+        self.__calc_desired_resistance()
+        while True:
+            self.steel = materials.Steel(self.__choose_material())
+            self.__calc_thickness()
+            choice = ''
+            if self.__is_hardenability() is True:
+                print('\tSelected steel is suitable.')
+            else:
+                print(f'\tSelected steel is not suitable. r2, m: {self.r2}')
+            choice = input('>>> your choice (ok, new, exit): ')
+            if choice == 'ok':
+                break
+            elif choice == 'new':
+                continue
+            else:
+                self.steel = materials.Steel([0, 0, 0])
+                break
+        if self.steel.sigma != 0:
+            print(f'Your selected steel: {self.steel}')
+        else:
+            print('It is impossible to design monoblock barrel.\n'
+                  'You can use module for designing multi-layered barrel...')
 
     @staticmethod
     def show_ballist_avrg_press(folder='', x_key='t', y_key='p',
@@ -119,15 +150,17 @@ class Monoblock:
         p_list.append(self.pb50)
         p_list.append(self.pb_50)
         p_list.append(self.p_env)
+        p_list.append(self.p_des)
 
         L_list = []
         L_list.append(self.L15)
         L_list.append(self.L50)
         L_list.append(self.L_50)
-        L_list.append(self.L_env)
+        L_list.append(self.L)
+        L_list.append(self.L)
 
         pltb.build_plots_list([L_list, p_list], 'L', 'p',
-                              'green', 'red', 'blue', 'gray',
+                              'green', 'red', 'blue', 'gray', 'orange',
                               x_dim='м', y_dim='МПа',
                               x_step=0.5, y_step=50,
                               win_name='ILines')
@@ -143,7 +176,7 @@ class Monoblock:
         print(f'Depth of cut is {round(hmin * 1e3, 3)}...{round(hmax * 1e3, 3)} mm')
         while True:
             self.h = float(input('\t- set final value: ')) * 0.001
-            if self.h >= hmin and self.h <= hmax:
+            if hmin <= self.h <= hmax:
                 break
             print('Error: invalid value (< or > than boundaries)!\nPlease, try again...')
 
@@ -151,7 +184,7 @@ class Monoblock:
         print('Set cones for smooth tank barrel:')
         while True:
             self.K_main_cone = float(input('\t- main cone (1:50...1:100): 1/')) ** (-1)
-            if self.K_main_cone <= 1/50 and self.K_main_cone >= 1/100:
+            if 1/100 <= self.K_main_cone <= 1/50:
                 break
             print('Warning: invalid cone value! Please, try again...')
         print('\t- transition cone will be calculated automatically')
@@ -159,7 +192,7 @@ class Monoblock:
         self.K_tail_cone = 1 / 200
         while True:
             self.K_thrust_cone = float(input('\t- thrust cone (1:20...1:40): 1/')) ** (-1)
-            if self.K_thrust_cone <= 1/20 and self.K_thrust_cone >= 1/40:
+            if 1/40 <= self.K_thrust_cone <= 1/20:
                 break
             print('Warning: invalid cone value! Please, try again...')
 
@@ -278,19 +311,115 @@ class Monoblock:
         x_end = self.L_cham_max + a
         while x < x_end:
             self.p_env.append(self.p_cham_max - (self.p_cham_max - self.pb_max) * x ** 2 / x_end ** 2)
-            self.L_env.append(x - a)
+            self.L.append(x - a)
             x += 0.001
         x -= a
-        print(f'x = {x}')
         i = 0
         while self.L50[i] < x:
             i += 1
         adder = 0
         while i < len(self.pb50):
             self.p_env.append((1.02 + adder) * self.pb50[i])
-            self.L_env.append(self.L50[i])
+            self.L.append(self.L50[i])
             adder += 0.0003
             i += 1
+
+    def __calc_desired_resistance(self):
+        for x, p in zip(self.L, self.p_env):
+            self.p_des.append(p * self.n(x))
+
+    # Safety factor
+    def n(self, x):
+        """
+        Safety factor function for smooth tank barrel.
+        :param x: current coordinate in barrel chanel
+        :return: safety factor
+        """
+        if x < 0:
+            return 1
+        if 0 <= x <= self.L_cham_max:
+            return 1.1
+        if x > self.L_cham_max:
+            return 1.1 + 0.8 * (x - self.L_cham_max) / (self.L[-1] - self.L_cham_max)
+
+    def __choose_material(self):
+        print('Choosing of barrel material\n\tSteels list:')
+        steels = self.__init_steels()
+        for steel in steels:
+            steel['sigma'] = float(steel['sigma'])
+            steel['hardenability'] = float(steel['hardenability'])
+            print('\t-', steel)
+
+        print(f'\tCondition: p_chanel_max = {round(self.p_cham_max)} MPa <= (0.4...0.6)*sigma')
+        print('\tFor this steels:')
+        for steel in steels:
+            ok = False
+            if 0.6 * steel['sigma'] >= self.p_cham_max:
+                ok = True
+            print(f"\t- {steel['name']}: "
+                  f"sigma = {0.4 * steel['sigma']}...{0.6 * steel['sigma']} MPa"
+                  f" ({ok})")
+        while True:
+            name = input('\tChoose steel (by name): ')
+            sigma = 0
+            hard = 0
+            ok = False
+            for steel in steels:
+                if name == steel['name']:
+                    sigma = steel['sigma']
+                    hard = steel['hardenability']
+                    ok = True
+                    break
+            if ok is True:
+                break
+            print('Warning: no such steel in list! Please, try again...')
+        while True:
+            share = float(input('\tSet share of steel sigma: '))
+            if 0.4 <= share <= 0.6:
+                break
+            print('Warning: invalid length value! Please, try again...')
+        return name, share * sigma, hard
+
+    def __init_steels(self):
+        res = mpar.read_xml_tree('src/steels.xml')
+        steels = res[::2]
+        data = res[1::2]
+        for s, d in zip(steels, data):
+            s.update(d)
+        return steels
+
+    def __calc_thickness(self):
+        self.r1 = [self.d_main / 2,
+                   self.d / 2,
+                   self.d / 2,
+                   self.d / 2]
+        indexes = [0,
+                   self.find_index(self.L, 0),
+                   self.find_index(self.L, self.L_cham_max),
+                   len(self.L) - 1]
+        self.r2 = []
+        for r, i in zip(self.r1, indexes):
+            if 3 * self.steel.sigma - 4 * self.p_des[i] > 0:
+                self.r2.append(round(r * np.sqrt((3 * self.steel.sigma + 2 * self.p_des[i]) /
+                                                 (3 * self.steel.sigma - 4 * self.p_des[i])), 3))
+            else:
+                self.r2.append(0)
+
+    @staticmethod
+    def find_index(arr, val):
+        index = 0
+        min_differ = abs(arr[0] - val)
+        for i in range(1, len(arr)):
+            if abs(arr[i] - val) < min_differ:
+                min_differ = abs(arr[i] - val)
+                index = i
+        return index
+
+    def __is_hardenability(self):
+        for r1, r2 in zip(self.r1, self.r2):
+            if r2 - r1 > self.steel.hardenability or r2 - r1 < 0:
+                return False
+        return True
 
     def __write_geometry_txt(self, path):
         with open(path, 'w') as file:

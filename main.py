@@ -10,7 +10,7 @@ def main():
 
     barr = mb.Monoblock('src/StartData.csv')
     barr.start_solve()
-    print(barr)
+    # print(barr)
     # barr.show_indicator_lines('src/', 'L', 'p',
     #                           'green', 'red', 'blue',
     #                           x_dim='м', y_dim='МПа',
