@@ -61,7 +61,7 @@ class Monoblock:
 
     def __choose_material(self):
         print('Choosing of barrel material\n\tSteels list:')
-        steels = self.__init_steels()
+        steels = self.init_steels()
         for steel in steels:
             steel['sigma'] = float(steel['sigma'])
             steel['hardenability'] = float(steel['hardenability'])
@@ -76,7 +76,7 @@ class Monoblock:
                   f"sigma = {0.4 * steel['sigma']}...{0.6 * steel['sigma']} MPa"
                   f" ({ok})")
         while True:
-            name = input('\tChoose steel (by name): ')
+            name = input('\tChoose steel (by name): ').upper()
             sigma = 0
             hard = 0
             ok = False
@@ -96,7 +96,8 @@ class Monoblock:
             print('Warning: invalid length value! Please, try again...')
         return name, share * sigma, hard
 
-    def __init_steels(self):
+    @staticmethod
+    def init_steels():
         res = mpar.read_xml_tree('src/steels.xml')
         steels = res[::2]
         data = res[1::2]
