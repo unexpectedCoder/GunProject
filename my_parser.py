@@ -2,7 +2,7 @@ from xml.etree import ElementTree
 import csv
 
 
-def read_txt_with_fieldnames(path, delim):
+def read_txt_with_fieldnames(file, delim):
     """
     This function reads data from TXT file with forming field of names
     for further converting to CSV file.
@@ -11,16 +11,16 @@ def read_txt_with_fieldnames(path, delim):
     :return: data and field of names
     """
     data = []
-    with open(path, 'r') as file:
-        fieldnames = file.readline().split(delim)
-        fieldnames[-1] = fieldnames[-1][:-1]
-        for line in file:
-            new_line = line.split(delim)
-            new_line[-1] = new_line[-1][:-1]
-            buf = []
-            for x in new_line:
-                buf.append(float(x))
-            data.append(dict(zip(fieldnames, buf)))
+    fieldnames = file.readline().split(delim)
+    fieldnames[-1] = fieldnames[-1][:-1]
+    for line in file:
+        new_line = line.split(delim)
+        new_line[-1] = new_line[-1][:-1]
+        buf = []
+        for x in new_line:
+            print(f'x = {x}')
+            buf.append(float(x))
+        data.append(dict(zip(fieldnames, buf)))
     return data, fieldnames
 
 

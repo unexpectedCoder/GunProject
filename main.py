@@ -1,3 +1,4 @@
+import bore
 import monoblock as mono
 import multilay_barrel as multi
 
@@ -7,7 +8,11 @@ import os
 def main():
     if os.path.isdir('src') is False:
         os.mkdir('src')
-
+    choice = input('Show indicator lines (graphs)? (+/-): ')
+    if choice == '+':
+        bb = bore.BarrelBore('src/StartData.csv')
+        bb.build_graphs()
+        bb.show_graphs()
     choice = input('Design monobloc barrel? (+/-): ')
     if choice == '+':
         barr = mono.Monoblock('src/StartData.csv')

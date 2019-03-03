@@ -18,18 +18,19 @@ def txt_to_csv(path, **kwargs):
             delim = kwargs['delim']
         else:
             delim = '\t'
-
         data, fieldnames = my_parser.read_txt_with_fieldnames(ftxt, delim)
-    __write_csv_dict(path + '.csv', fieldnames, data, delim)
+        print(data, '\n', fieldnames)
+    write_csv_dict(path + '.csv', fieldnames, data, delim)
 
 
-def __write_csv_dict(path, fieldnames, data, delim):
+def write_csv_dict(path, fieldnames, data, delim):
     """
     Auxiliary function. Used from other functions of the module.
     For example, from txt_to_csv().
     """
     with open(path, 'w') as file:
         writer = csv.DictWriter(file, fieldnames=fieldnames, delimiter=delim)
+        print(f'fieldnames = {fieldnames}')
         writer.writeheader()
         for row in data:
             writer.writerow(row)

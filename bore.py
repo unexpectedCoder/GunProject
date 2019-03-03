@@ -94,7 +94,7 @@ class BarrelBore:
         self.__calc_envelope_curve()
         self.__calc_desired_resistance()
 
-    def show_graphs(self):
+    def show_graphs(self, data = None):
         p_list = []
         p_list.append(self.pb15)
         p_list.append(self.pb50)
@@ -107,10 +107,17 @@ class BarrelBore:
         L_list.append(self.L_50)
         L_list.append(self.L)
         L_list.append(self.L)
+        colors = ['green', 'red', 'blue', 'gray', 'orange']
+        if data is not None:
+            for a in data:
+                print(f'a0: {a[0]}\na1: {a[1]}')
+                p_list.append(a[0])
+                L_list.append(a[1])
+            colors.append('black')
+            colors.append('pink')
         pltb.build_plots_list([L_list, p_list], 'L', 'p',
-                              'green', 'red', 'blue', 'gray', 'orange',
+                              *colors,
                               x_dim='м', y_dim='МПа',
-                              x_step=0.5, y_step=50,
                               win_name='ILines')
 
     # Private functions

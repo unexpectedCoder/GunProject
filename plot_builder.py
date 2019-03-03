@@ -110,7 +110,7 @@ def build_plots_list(xy, xlab, ylab, *colors, **kwargs):
         exit(-1)
 
     if len(colors) != len(xy[0]):
-        print('Warning: size of colors list != size of data list!')
+        print(f'Warning: size of colors list ({len(colors)}) != size of data list ({len(xy[0])})!')
         autocolors = True
     else:
         autocolors = False
