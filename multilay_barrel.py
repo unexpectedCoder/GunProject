@@ -3,6 +3,7 @@ import my_parser as mpar
 import materials
 import my_file_converter as fconv
 import my_types as mtype
+import plot_builder as pltb
 
 import os
 import numpy as np
@@ -213,3 +214,19 @@ class MultilayBarrel:
                   / (3 * (self.a31[i] ** 2 - 1))
             p__2add = p_c2tau - p_2
             self.p_c2add.append(p__2add * (self.a31[i] ** 2 - 1) / (self.a32[i] ** 2 - 1))
+
+    def show_graphs(self):
+        p = [self.barr_bore.pb15, self.barr_bore.pb50, self.barr_bore.pb_50,
+             self.barr_bore.p_env, self.barr_bore.p_des, self.p_act, self.p_c2add]
+        L = [self.barr_bore.L15, self.barr_bore.L50, self.barr_bore.L_50,
+             self.barr_bore.L, self.barr_bore.L, self.x, self.x[:-5]]
+        r1, r2, r3 = [], [], []
+        x = []
+        for point in self.points:
+            r1.append(point.r1)
+            r2.append(point.r2)
+            r3.append(point.r3)
+            x.append(point.x)
+        pltb.build_res_graphs([[x, r1], [x, r2], [x, r3]],
+                              [L, p],
+                              'green', 'red', 'blue', 'brown', 'gray', 'black', 'orange')

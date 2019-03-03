@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import pylab
 import numpy as np
 
 
@@ -149,3 +150,32 @@ def build_plots_list(xy, xlab, ylab, *colors, **kwargs):
 
     plt.grid()
     plt.show()
+
+
+def build_res_graphs(geom, graphs, *colors, **kwargs):
+    pylab.subplot(2, 1, 1)
+
+    if len(graphs[0]) != len(graphs[1]):
+        print('Error: size of X list != size of Y list!')
+        exit(-1)
+
+    if len(colors) != len(graphs[0]):
+        print(f'Warning: size of colors list ({len(colors)}) != size of data list ({len(graphs[0])})!')
+        autocolors = True
+    else:
+        autocolors = False
+
+    X, Y = graphs[0], graphs[1]
+    for x_list, y_list, color in zip(X, Y, colors):
+        if autocolors is False:
+            pylab.plot(x_list, y_list, color=color)
+        else:
+            pylab.plot(x_list, y_list)
+    pylab.grid(True)
+
+    pylab.subplot(2, 1, 2)
+    for g in geom:
+        pylab.plot(g[0], g[1], color='black')
+    pylab.grid(True)
+
+    pylab.show()

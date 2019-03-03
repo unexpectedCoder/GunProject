@@ -23,6 +23,9 @@ def main():
     if choice == '+':
         barr = multi.MultilayBarrel('src/StartData.csv')
         barr.design()
+        choice = input('Show graphs with barrel? (+/-): ')
+        if choice == '+':
+            barr.show_graphs()
         print(barr)
         del barr
 
