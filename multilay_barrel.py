@@ -54,6 +54,8 @@ class MultilayBarrel:
                 print('\tWarning: selected steel is NOT suitable!\n'
                       '\tPlease, select other steel or enter "exit"...')
                 choice = input('\t>>> ')
+
+        print('\n')
         if choice == 'ok':
             self.__read_geometry()
             self.__set_ref_tension()
@@ -143,14 +145,21 @@ class MultilayBarrel:
         print(f'\t- r3, mm: {self.r3 * 1e3}')
 
     def __check_sigma_eTK(self, a31):
-        if self.steel.sigma > 2 / 3 * max(self.barr_bore.p_des) * (2 * a31 ** 2 + 1) / (a31 ** 2 - 1):
-            print(self.steel.sigma)
-            print(2 / 3 * max(self.barr_bore.p_des) * (2 * a31 ** 2 + 1) / (a31 ** 2 - 1))
+        print('Steel strength checking:')
+        expr = 2 / 3 * max(self.barr_bore.p_des) * (2 * a31 ** 2 + 1) / (a31 ** 2 - 1)
+        print(f'\tSteel sigma_e, MPa: {round(self.steel.sigma, 1)}')
+        print(f'\tNeeded sigma_e, MPa: {round(expr, 1)}')
+        if self.steel.sigma > expr:
             return True
         return False
 
     def __check_hardenability(self):
-        if self.steel.hardenability > self.r2 - self.r1 and self.steel.hardenability > self.r3 - self.r2:
+        print('Hardenability checking:')
+        dr21 = self.r2 - self.r1
+        dr32 = self.r3 - self.r2
+        print(f'\tSelected steel hardenability, mm: {round(self.steel.hardenability * 1e3, 1)}')
+        print(f'\tNeeded hardenability, mm: {round(dr21 * 1e3, 2)} and {round(dr32 * 1e3, 1)}')
+        if self.steel.hardenability > dr21 and self.steel.hardenability > dr32:
             return True
         return False
 
@@ -162,7 +171,6 @@ class MultilayBarrel:
     def __read_geometry(self):
         fconv.txt_to_csv('multi_layered/geometry')
         data = mpar.read_csv_dict('multi_layered/geometry.csv', '\t')
-        print(f'data = {data}')
         for d in data:
             point = mtype.BarrPoint(round(float(d['num']), 0),
                                     float(d['d1']) * 1e-3 / 2,

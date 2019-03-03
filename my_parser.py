@@ -18,7 +18,6 @@ def read_txt_with_fieldnames(file, delim):
         new_line[-1] = new_line[-1][:-1]
         buf = []
         for x in new_line:
-            print(f'x = {x}')
             buf.append(float(x))
         data.append(dict(zip(fieldnames, buf)))
     return data, fieldnames

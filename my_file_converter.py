@@ -19,7 +19,6 @@ def txt_to_csv(path, **kwargs):
         else:
             delim = '\t'
         data, fieldnames = my_parser.read_txt_with_fieldnames(ftxt, delim)
-        print(data, '\n', fieldnames)
     write_csv_dict(path + '.csv', fieldnames, data, delim)
 
 
@@ -30,7 +29,6 @@ def write_csv_dict(path, fieldnames, data, delim):
     """
     with open(path, 'w') as file:
         writer = csv.DictWriter(file, fieldnames=fieldnames, delimiter=delim)
-        print(f'fieldnames = {fieldnames}')
         writer.writeheader()
         for row in data:
             writer.writerow(row)

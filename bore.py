@@ -110,7 +110,6 @@ class BarrelBore:
         colors = ['green', 'red', 'blue', 'gray', 'orange']
         if data is not None:
             for a in data:
-                print(f'a0: {a[0]}\na1: {a[1]}')
                 p_list.append(a[0])
                 L_list.append(a[1])
             colors.append('black')
