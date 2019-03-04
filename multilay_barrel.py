@@ -1,4 +1,5 @@
 import bore
+import my_functions as mfunc
 import my_parser as mpar
 import materials
 import my_file_converter as fconv
@@ -19,7 +20,7 @@ class MultilayBarrel:
     T1 = []
     p_act = []
     x = []
-    p_c2add = []
+    p_c_act = []
 
     # Public functions
     def __init__(self, data_path):
@@ -63,7 +64,8 @@ class MultilayBarrel:
             self.__calc_T1()
             self.__calc_possible_resist()
             self.__calc_casing()
-            self.barr_bore.show_graphs([[self.p_act, self.x], [self.p_c2add, self.x[:-5]]])
+            self.__write_geometry_txt()
+            self.barr_bore.show_graphs([[self.p_act, self.x]])
 
     def __choose_material(self):
         print('Choosing of barrel material\n\tSteels list:')
@@ -213,11 +215,34 @@ class MultilayBarrel:
             p_2 = 1.5 * (self.eta * self.steel.E * (self.a21[i] ** 2 - 1) * (self.a32[i] ** 2 - 1))\
                   / (3 * (self.a31[i] ** 2 - 1))
             p__2add = p_c2tau - p_2
-            self.p_c2add.append(p__2add * (self.a31[i] ** 2 - 1) / (self.a32[i] ** 2 - 1))
+            self.p_c_act.append(p__2add * (self.a31[i] ** 2 - 1) / (self.a32[i] ** 2 - 1))
+
+    def __write_geometry_txt(self):
+        head = '№\tr1\tr2\tr3\tp_ж\tp_1д\tpК_1д\teta'.split('\t')
+        with open('multi_layered/geometry(res).txt', 'w') as file:
+            for i in range(len(head) - 1):
+                file.write(head[i] + '\t')
+            file.write(head[-1] + '\n')
+            for point, i in zip(self.points, range(len(self.points))):
+                file.write(str(int(point.num)) + '\t')
+                file.write(str(round(point.r1 * 1e3, 1)) + '\t')
+                file.write(str(round(point.r2 * 1e3, 1)) + '\t')
+                file.write(str(round(point.r3 * 1e3, 1)) + '\t')
+                index = mfunc.find_index(self.barr_bore.L, point.x)
+                file.write(str(round(self.barr_bore.p_env[index], 1)) + '\t')
+                file.write(str(round(self.p_act[i], 1)) + '\t')
+                if i < len(self.points) - 5:
+                    file.write(str(round(self.p_c_act[i], 1)) + '\t')
+                else:
+                    file.write('-\t')
+                if i < len(self.points) - 5:
+                    file.write(str(self.eta) + '\n')
+                else:
+                    file.write('-\n')
 
     def show_graphs(self):
         p = [self.barr_bore.pb15, self.barr_bore.pb50, self.barr_bore.pb_50,
-             self.barr_bore.p_env, self.barr_bore.p_des, self.p_act, self.p_c2add]
+             self.barr_bore.p_env, self.barr_bore.p_des, self.p_act, self.p_c_act]
         L = [self.barr_bore.L15, self.barr_bore.L50, self.barr_bore.L_50,
              self.barr_bore.L, self.barr_bore.L, self.x, self.x[:-5]]
         r1, r2, r3 = [], [], []

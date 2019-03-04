@@ -113,7 +113,7 @@ class BarrelBore:
                 p_list.append(a[0])
                 L_list.append(a[1])
             colors.append('black')
-            colors.append('pink')
+            # colors.append('pink')
         pltb.build_plots_list([L_list, p_list], 'L', 'p',
                               *colors,
                               x_dim='м', y_dim='МПа',
